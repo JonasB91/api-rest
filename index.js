@@ -1,4 +1,4 @@
-let express = require("express"); // INSTALLERA MED "npm install express" I KOMMANDOTOLKEN
+let express = require("express"); 
 let app = express();
 app.listen(3000);
 console.log("Servern körs på port 3000");
@@ -7,44 +7,43 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + "/index.html");
 });
 
-const mysql = require("mysql"); // INSTALLERA MED "npm install mysql" I KOMMANDOTOLKEN
+const mysql = require("mysql"); 
 con = mysql.createConnection({
-  host: "localhost", // databas-serverns IP-adress
-  user: "root", // standardanvändarnamn för XAMPP
-  password: "", // standardlösenord för XAMPP
-  database: "gästbokjensen2023", // ÄNDRA TILL NAMN PÅ ER EGEN DATABAS
-  multipleStatements: true, // OBS: måste tillåta att vi kör flera sql-anrop i samma query
+  host: "localhost", 
+  user: "root", 
+  password: "", 
+  database: "gästbokjensen2023", // Bytt till min databas gästbokjensen2023 
+  multipleStatements: true, 
 });
 
-app.use(express.json()); // för att läsa data från klient och för att skicka svar (ersätter bodyparser som vi använt någon gång tidigare)
-const COLUMNS = ["id", "username", "password", "name", "email"]; // ÄNDRA TILL NAMN PÅ KOLUMNER I ER EGEN TABELL
+app.use(express.json()); 
+const COLUMNS = ["id", "username", "password", "name", "email"]; 
 
 // grundläggande exempel - returnera en databastabell som JSON
 app.get("/users", function (req, res) {
-  let sql = "SELECT * FROM users"; // ÄNDRA TILL NAMN PÅ ER EGEN TABELL (om den heter något annat än "users")
-  let condition = createCondition(req.query); // output t.ex. " WHERE lastname='Rosencrantz'"
-  console.log(sql + condition); // t.ex. SELECT * FROM users WHERE lastname="Rosencrantz"
-  // skicka query till databasen
+  let sql = "SELECT * FROM users"; 
+  let condition = createCondition(req.query); 
+  console.log(sql + condition); 
   con.query(sql + condition, function (err, result, fields) {
     res.send(result);
   });
 });
 
 let createCondition = function (query) {
-  // skapar ett WHERE-villkor utifrån query-parametrar
+ 
   console.log(query);
   let output = " WHERE ";
   for (let key in query) {
     if (COLUMNS.includes(key)) {
-      // om vi har ett kolumnnamn i vårt query
-      output += `${key}="${query[key]}" OR `; // t.ex. lastname="Rosencrantz"
+      
+      output += `${key}="${query[key]}" OR `; 
     }
   }
   if (output.length == 7) {
-    // " WHERE "
-    return ""; // om query är tomt eller inte är relevant för vår databastabell - returnera en tom sträng
+    
+    return ""; 
   } else {
-    return output.substring(0, output.length - 4); // ta bort sista " OR "
+    return output.substring(0, output.length - 4); 
   }
 };
 
@@ -71,7 +70,7 @@ app.post("/users", function (req, res) {
     res.status(400).send("username required!");
     return; // avslutar metoden
   }
-  let fields = ["username", "password", "name", "email"]; // ändra eventuellt till namn på er egen databastabells kolumner
+  let fields = ["username", "password", "name", "email"]; 
   for (let key in req.body) {
     if (!fields.includes(key)) {
       res.status(400).send("Unknown field: " + key);
@@ -84,7 +83,7 @@ app.post("/users", function (req, res) {
     '${req.body.password}',
     '${req.body.name}',
     '${req.body.email}');
-    SELECT LAST_INSERT_ID();`; // OBS: innehåller två query: ett insert och ett select
+    SELECT LAST_INSERT_ID();`; 
   console.log(sql);
 
   con.query(sql, function (err, result, fields) {
